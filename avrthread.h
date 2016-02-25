@@ -2,7 +2,6 @@
 #define AVRTHREAD_H
 
 #include <QObject>
-#include <QThread>
 #include <QProcess>
 #include <QDebug>
 #include <QSerialPortInfo>
@@ -10,7 +9,7 @@
 
 
 
-class AVRThread : public QThread
+class AVRThread : public QObject
 {
     Q_OBJECT
 public:
@@ -19,6 +18,8 @@ public:
     bool compile();
     bool objcopy();
     bool write();
+
+    void run();
     QList<QSerialPortInfo> availablePorts;
     QList<QStringList> devices;
     QList<QStringList> programmers;
@@ -28,12 +29,21 @@ public:
     int chipIndex;
     int programmerIndex;
     int baudIndex;
+
+    int errorCount;
+    int warningCount;
+
+    int step;
 private:
     QProcess *cmd;
 
-    void run();
+
 signals:
     void sendMsg(const QString &msg);
+    void sendFinish(const int &step);
+private slots:
+    void receiveMsg();
+    void receiveFinished();
 
 };
 

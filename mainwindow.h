@@ -31,6 +31,8 @@ private slots:
 
     void receiveMsg(const QString &msg);
 
+    void receiveFinish(const int &step);
+
 private:
     Ui::MainWindow *ui;
     QTextCodec *codec;

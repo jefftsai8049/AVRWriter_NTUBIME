@@ -8,6 +8,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     avr = new AVRThread;
     connect(avr,SIGNAL(sendMsg(QString)),this,SLOT(receiveMsg(QString)));
+    connect(avr,SIGNAL(sendFinish(int)),this,SLOT(receiveFinish(int)));
+
+    this->setWindowIcon(QIcon("icon/ic.png"));
 
     avr->availablePorts = QSerialPortInfo::availablePorts();
     for(int i = 0; i < avr->availablePorts.size(); i ++)
@@ -55,19 +58,12 @@ void MainWindow::on_write_pushButton_clicked()
     avr->chipIndex = ui->chip_comboBox->currentIndex();
     avr->programmerIndex = ui->programmer_comboBox->currentIndex();
     avr->baudIndex = ui->baudrate_comboBox->currentText().toInt();
+    avr->errorCount = 0;
+    avr->warningCount = 0;
+    avr->step = 0;
 
-    avr->start();
-    //QFuture<bool> compileProcessing = QtConcurrent::run(avr,&AVRThread::compile);
+    avr->run();
 
-
-    //    if(this->compile())
-    //        return;
-
-    //    if(this->objcopy())
-    //        return;
-
-    //    if(this->write())
-    //        return;
     ui->write_pushButton->setEnabled(1);
 }
 
@@ -80,7 +76,22 @@ void MainWindow::on_load_pushButton_clicked()
 
 void MainWindow::receiveMsg(const QString &msg)
 {
-    ui->textBrowser->append(msg);
+    ui->textBrowser->insertPlainText(msg);
+}
+
+void MainWindow::receiveFinish(const int &step)
+{
+    qDebug() << step;
+    if(step == 1)
+    {
+        ui->error_count_pushButton->setText("Error ("+QString::number(avr->errorCount)+")");
+        ui->warning_count_pushButton->setText("Warning ("+QString::number(avr->warningCount)+")");
+    }
+    else if(step == 3)
+    {
+        QStringList fileNames = ui->source_file_name_lineEdit->text().split("\\");
+        QFile::remove(fileNames[fileNames.size()-1].replace(".c",".hex"));
+    }
 }
 
 QList<QStringList> MainWindow::loadDeviceList()
