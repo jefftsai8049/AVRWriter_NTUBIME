@@ -133,7 +133,11 @@ bool AVRThread::write()
     QFile::copy(this->sourceFileName, hexFileNames[hexFileNames.size()-1]);
 
     QString writeCMD = "avr8-gnu-toolchain\\avrdude.exe";
-    writeCMD.append(" -P "+availablePorts[portIndex].portName());
+
+//    if(availablePorts[portIndex].portName() == )
+//    writeCMD.append(" -r ");
+    if(programmers[programmerIndex][0] == "arduino")
+        writeCMD.append(" -P "+availablePorts[portIndex].portName());
     writeCMD.append(" -b "+QString::number(baudIndex));
     writeCMD.append(" -p "+devices[chipIndex][1]);
     writeCMD.append(" -c "+programmers[programmerIndex][0]);
